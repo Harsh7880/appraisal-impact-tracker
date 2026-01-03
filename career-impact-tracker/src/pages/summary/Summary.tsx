@@ -1,29 +1,16 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabase'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import jsPDF from 'jspdf'
-
+import { formatSummaryByMode } from './summary.format'
+import {
+  buttonStyle,
+  primaryButtonStyle,
+  containerStyle
+} from './summary.styles'
 const genAI = new GoogleGenerativeAI(
   import.meta.env.VITE_GENAI_KEY
 )
-
-const buttonStyle = {
-  padding: '6px 12px',
-  borderRadius: 6,
-  border: '1px solid #ccc',
-  background: '#fff',
-  cursor: 'pointer',
-  fontSize: 14
-}
-
-const primaryButtonStyle = {
-  ...buttonStyle,
-  background: '#2563eb',
-  color: '#fff',
-  borderRadius: 6,
-  border: 'none',
-  fontWeight: 600
-}
 
 
 const model = genAI.getGenerativeModel({
@@ -32,6 +19,7 @@ const model = genAI.getGenerativeModel({
 const cleanTitle = (title: string) => { return title.replace(/^(improved|optimized|implemented|fixed)\s+/i, '').trim() }
 
 export default function Summary() {
+  
   const [period, setPeriod] = useState('30')
   const [summary, setSummary] = useState('')
   const [loading, setLoading] = useState(false)
@@ -39,10 +27,9 @@ export default function Summary() {
   const [mode, setMode] = useState<Mode>('appraisal')
   const animationKey = `${mode}-${summary.length}`
 
-
   const exportToPDF = () => {
     const doc = new jsPDF()
-
+    formatSummaryByMode(summary, mode);
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
     doc.text('Appraisal Summary', 14, 20)
@@ -51,7 +38,8 @@ export default function Summary() {
     doc.setFont('helvetica', 'normal')
     doc.text(`Period: Last ${period} days`, 14, 30)
 
-    const lines = formatSummaryByMode().map(b => `• ${b}`)
+    const lines = formatSummaryByMode(summary, mode).map(b => `• ${b}`)
+
 
     doc.text(lines, 14, 45, {
       maxWidth: 180,
@@ -66,32 +54,6 @@ export default function Summary() {
     )
 
     doc.save('appraisal-summary.pdf')
-  }
-
-  const formatSummaryByMode = () => {
-    const bullets = summary
-      .split('\n')
-      .map(b => b.replace(/^•\s*/, '').trim())
-      .filter(Boolean)
-
-    if (mode === 'resume') {
-      return bullets.map(b =>
-        b
-          .replace(/^Resolved/, 'Fixed')
-          .replace(/^Optimized/, 'Improved')
-          .replace(/^Implemented/, 'Built')
-          .replace(/,.*$/, '')
-      )
-    }
-
-    if (mode === 'manager') {
-      return bullets.map(b =>
-        b.endsWith('.') ? b : `${b}.`
-      )
-    }
-
-    // appraisal (default)
-    return bullets
   }
 
   const modeButton = (m: Mode, label: string) => (
@@ -256,14 +218,10 @@ export default function Summary() {
       setLoading(false)
     }
   }
+ 
   return (
     <div
-      style={{
-        maxWidth: 760,
-        margin: '40px auto',
-        padding: '24px',
-        fontFamily: 'Inter, system-ui, sans-serif'
-      }}
+      style={containerStyle}
     >
       <style>
       {`
@@ -336,7 +294,7 @@ export default function Summary() {
               </div>
             )}
 
-            {formatSummaryByMode().map((b, i) => (
+            {formatSummaryByMode(summary, mode).map((b, i) => (
               <div key={i} style={{ marginBottom: 14, lineHeight: 1.8 }}>
                 • {b}
               </div>
@@ -347,7 +305,7 @@ export default function Summary() {
             <button
               style={buttonStyle}
               onClick={() => {
-                const textToCopy = formatSummaryByMode()
+                const textToCopy = formatSummaryByMode(summary, mode)
                   .map(b => `• ${b}`)
                   .join('\n')
 
