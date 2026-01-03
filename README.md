@@ -24,6 +24,27 @@ A simple tool to:
 - Appraisal period selection
 - AI-generated appraisal summary
 
+## Wireframes
+
+Early-stage wireframes focused on speed, clarity, and daily usability.
+
+### Log Entry
+- Quick daily logging (under 60 seconds)
+- Impact tagging for appraisal alignment
+
+### Logs List
+- Chronological view of work
+- Quick edit and delete actions
+- Filter by impact type
+
+### Appraisal Summary
+- Time-based summaries (30 days, quarter, custom)
+- AI-generated appraisal-ready output
+- One-click copy/export
+
+![Wireframes](docs/wireframes/career-impact-tracker-wireframe.png)
+
+
 ## Tech Stack
 - Frontend: Next.js / React
 - Backend: Next.js API routes
