@@ -19,12 +19,14 @@ const model = genAI.getGenerativeModel({
 const cleanTitle = (title: string) => { return title.replace(/^(improved|optimized|implemented|fixed)\s+/i, '').trim() }
 
 export default function Summary() {
-  
+
   const [period, setPeriod] = useState('30')
   const [summary, setSummary] = useState('')
   const [loading, setLoading] = useState(false)
   type Mode = 'appraisal' | 'resume' | 'manager'
   const [mode, setMode] = useState<Mode>('appraisal')
+  const [generating, setGenerating] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
   const animationKey = `${mode}-${summary.length}`
 
   const exportToPDF = () => {
@@ -54,6 +56,8 @@ export default function Summary() {
     )
 
     doc.save('appraisal-summary.pdf')
+    setToast('PDF exported successfully')
+    setTimeout(() => setToast(null), 2000)
   }
 
   const modeButton = (m: Mode, label: string) => (
@@ -73,7 +77,9 @@ export default function Summary() {
     </button>
   )
   const generateSummary = async () => {
+    if (loading) return
     setLoading(true)
+
 
     // 🔐 Auth check
     const {
@@ -218,13 +224,13 @@ export default function Summary() {
       setLoading(false)
     }
   }
- 
+
   return (
     <div
       style={containerStyle}
     >
       <style>
-      {`
+        {`
         @keyframes fadeSlide {
           from {
             opacity: 0;
@@ -236,7 +242,7 @@ export default function Summary() {
           }
         }
       `}
-    </style>
+      </style>
 
       <h1 style={{ fontSize: 28, marginBottom: 6 }}>
         Appraisal Summary
@@ -256,16 +262,16 @@ export default function Summary() {
           <option value="90">This Quarter</option>
           <option value="180">Last 6 months</option>
         </select>
-      
+
 
         <button onClick={generateSummary} disabled={loading} style={primaryButtonStyle}>
-         {loading ? 'Generating summary…' : 'Generate appraisal summary'}
+          {loading ? 'Generating summary…' : 'Generate appraisal summary'}
         </button>
-        
+
       </div>
-        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 6 }}>
-          We’ll summarize all work logs created during the selected period.
-        </p>
+      <p style={{ fontSize: 13, color: '#6b7280', marginTop: 6 }}>
+        We’ll summarize all work logs created during the selected period.
+      </p>
       {!summary && !loading && (
         <div
           style={{
@@ -333,7 +339,12 @@ export default function Summary() {
 
           <div style={{ marginTop: 8 }}>
             <button
-              style={buttonStyle}
+              style={{
+                ...buttonStyle,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+              disabled={loading}
               onClick={() => {
                 const textToCopy = formatSummaryByMode(summary, mode)
                   .map(b => `• ${b}`)
@@ -344,20 +355,49 @@ export default function Summary() {
                     ? `Executive Summary\n\n${textToCopy}`
                     : textToCopy
                 )
+
+                setToast('Copied to clipboard')
+                setTimeout(() => setToast(null), 2000)
               }}
             >
               Copy
             </button>
 
             {summary && (
-              <button onClick={exportToPDF} style={{ ...buttonStyle, marginLeft: 8 }}>
+              <button
+                onClick={exportToPDF}
+                disabled={loading}
+                style={{
+                  ...buttonStyle,
+                  marginLeft: 8,
+                  opacity: loading ? 0.6 : 1,
+                  cursor: loading ? 'not-allowed' : 'pointer'
+                }}
+              >
                 Export PDF
               </button>
             )}
           </div>
         </>
       )}
-
+      {toast && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            background: '#111827',
+            color: '#fff',
+            padding: '10px 14px',
+            borderRadius: 8,
+            fontSize: 13,
+            boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+            zIndex: 50
+          }}
+        >
+          {toast}
+        </div>
+      )}
     </div>
   )
 }

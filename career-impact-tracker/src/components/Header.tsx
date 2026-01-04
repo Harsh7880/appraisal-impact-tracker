@@ -1,27 +1,35 @@
 import { supabase } from '../lib/supabase'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 
 export default function Header() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState<string | null>(null)
-  const location = useLocation()
 
+  // ✅ Listen to auth state changes (LOGIN / LOGOUT)
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null)
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession()
+      setEmail(data.session?.user.email ?? null)
+    }
+
+    getSession()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user.email ?? null)
     })
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  const navLinkStyle = (path: string) => ({
-    textDecoration: 'none',
-    fontSize: 14,
-    fontWeight: 500,
-    padding: '6px 10px',
-    borderRadius: 6,
-    color: location.pathname === path ? '#2563eb' : '#374151',
-    background: location.pathname === path ? '#e0e7ff' : 'transparent',
-    transition: 'all 0.15s ease',
-  })
+  // ✅ Proper logout handler
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setEmail(null) // immediately clear UI
+    navigate('/')
+  }
 
   return (
     <header
@@ -31,79 +39,100 @@ export default function Header() {
       }}
     >
       <div
-  style={{
-    maxWidth: 1100,
-    margin: '0 auto',
-    padding: '14px 16px',
-    display: 'grid',
-    gridTemplateColumns: '1fr auto 1fr',
-    alignItems: 'center',
-  }}
->
-  {/* Left: Brand */}
-  <Link
-    to="/logs"
-    style={{
-      textDecoration: 'none',
-      color: '#111827',
-      fontWeight: 700,
-      fontSize: 18,
-      justifySelf: 'start',
-    }}
-  >
-    Appraisal Tracker
-  </Link>
+        style={{
+          maxWidth: 960,
+          margin: '0 auto',
+          padding: '14px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {/* Left */}
+        <Link
+          to={email ? '/logs' : '/'}
+          style={{
+            textDecoration: 'none',
+            color: '#111827',
+            fontWeight: 700,
+            fontSize: 18,
+          }}
+        >
+          Appraisal Tracker
+        </Link>
 
-  {/* Center: Navigation */}
-  <nav
-    style={{
-      display: 'flex',
-      gap: 8,
-      justifySelf: 'center',
-      background: '#f1f5f9',
-      padding: '4px',
-      borderRadius: 10,
-    }}
-  >
-    <Link to="/logs" style={navLinkStyle('/logs')}>
-      Logs
-    </Link>
-    <Link to="/summary" style={navLinkStyle('/summary')}>
-      Summary
-    </Link>
-  </nav>
+        {/* Center nav ONLY if logged in */}
+        {email && (
+          <div
+            style={{
+              background: '#f1f5f9',
+              padding: 4,
+              borderRadius: 999,
+              display: 'flex',
+              gap: 4,
+            }}
+          >
+            <Link
+              to="/logs"
+              style={{
+                padding: '6px 12px',
+                borderRadius: 999,
+                fontSize: 13,
+                textDecoration: 'none',
+                color: '#111827',
+              }}
+            >
+              Logs
+            </Link>
+            <Link
+              to="/summary"
+              style={{
+                padding: '6px 12px',
+                borderRadius: 999,
+                fontSize: 13,
+                textDecoration: 'none',
+                color: '#111827',
+              }}
+            >
+              Summary
+            </Link>
+          </div>
+        )}
 
-  {/* Right: User */}
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 12,
-      justifySelf: 'end',
-    }}
-  >
-    {email && (
-      <span style={{ fontSize: 13, color: '#6b7280' }}>
-        {email}
-      </span>
-    )}
+        {/* Right auth UI ONLY if logged in */}
+        {email && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                color: '#6b7280',
+              }}
+            >
+              {email}
+            </span>
 
-    <button
-      onClick={() => supabase.auth.signOut()}
-      style={{
-        fontSize: 13,
-        padding: '6px 12px',
-        borderRadius: 6,
-        border: '1px solid #d1d5db',
-        background: '#fff',
-        cursor: 'pointer',
-      }}
-    >
-      Logout
-    </button>
-  </div>
-</div>
-
+            <button
+              onClick={handleLogout}
+              style={{
+                fontSize: 13,
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: '1px solid #d1d5db',
+                background: '#fff',
+                cursor: 'pointer',
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   )
 }
