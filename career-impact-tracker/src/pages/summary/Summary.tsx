@@ -8,9 +8,35 @@ import {
   primaryButtonStyle,
   containerStyle
 } from './summary.styles'
+
 const genAI = new GoogleGenerativeAI(
   import.meta.env.VITE_GENAI_KEY
 )
+const getSummaryInsight = (logs: any[]) => {
+  if (!logs || logs.length === 0) return null
+
+  const impactCount: Record<string, number> = {}
+
+  logs.forEach((log) => {
+    impactCount[log.impact_type] =
+      (impactCount[log.impact_type] || 0) + 1
+  })
+
+  const total = logs.length
+
+  const sorted = Object.entries(impactCount).sort(
+    (a, b) => b[1] - a[1]
+  )
+
+  const [topImpact, topCount] = sorted[0]
+  const percentage = Math.round((topCount / total) * 100)
+
+  return {
+    topImpact,
+    percentage,
+    total,
+  }
+}
 
 
 const model = genAI.getGenerativeModel({
@@ -26,6 +52,12 @@ export default function Summary() {
   type Mode = 'appraisal' | 'resume' | 'manager'
   const [mode, setMode] = useState<Mode>('appraisal')
   const [toast, setToast] = useState<string | null>(null)
+  const [insight, setInsight] = useState<{
+  topImpact: string
+  percentage: number
+  total: number
+} | null>(null)
+
   const animationKey = `${mode}-${summary.length}`
 
   const exportToPDF = () => {
@@ -105,6 +137,7 @@ export default function Summary() {
       setLoading(false)
       return
     }
+    setInsight(getSummaryInsight(logs))
 
     // 🧠 Format logs
     const formattedLogs = logs
@@ -309,6 +342,35 @@ export default function Summary() {
           {modeButton('manager', 'Manager Review')}
         </div>
       )}
+      {insight && (
+  <div
+    style={{
+      background: '#f1f5f9',
+      border: '1px solid #e5e7eb',
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+    }}
+  >
+    <div
+      style={{
+        fontSize: 13,
+        fontWeight: 600,
+        color: '#2563eb',
+        marginBottom: 6,
+      }}
+    >
+      Insight
+    </div>
+
+    <div style={{ fontSize: 14, color: '#111827' }}>
+      You focused mainly on{' '}
+      <strong>{insight.topImpact}</strong> work (
+      {insight.percentage}% of your {insight.total} logs)
+      during this period.
+    </div>
+  </div>
+)}
       {summary && (
         <>
           <div

@@ -18,6 +18,25 @@ const impactColorMap: Record<
     Collaboration: { bg: '#e0e7ff', text: '#3730a3' },
     Delivery: { bg: '#dcfce7', text: '#166534' },
 }
+function getImpactInsight(
+    topImpact: string | null,
+    breakdown: Record<string, number>
+) {
+    if (!topImpact) return null
+
+    const total = Object.values(breakdown).reduce((a, b) => a + b, 0)
+    const topPercent = Math.round((breakdown[topImpact] / total) * 100)
+
+    if (topPercent >= 60) {
+        return `Most of your work is focused on ${topImpact}. Consider adding impact from other areas for a more balanced appraisal narrative.`
+    }
+
+    if (topPercent >= 40) {
+        return `Strong focus on ${topImpact}, showing clear ownership and delivery in this area.`
+    }
+
+    return `Your work is well balanced across impact areas — great signal for overall performance.`
+}
 
 
 export default function Dashboard() {
@@ -181,6 +200,19 @@ export default function Dashboard() {
                     📆 {streak.activeDaysThisWeek} day(s) active this week
                 </div>
             </div>
+            <p
+                style={{
+                    fontSize: 13,
+                    color: '#6b7280',
+                    marginTop: -16,
+                    marginBottom: 32,
+                }}
+            >
+                {streak.activeDaysThisWeek >= 3
+                    ? 'You’re building strong momentum this week — this consistency really helps during appraisals.'
+                    : 'Try logging work more frequently to make your impact easier to recall during reviews.'}
+            </p>
+
             {/* Recent Activity */}
             {recentLogs.length > 0 && (
                 <div style={{ marginBottom: 32 }}>
@@ -250,13 +282,10 @@ export default function Dashboard() {
                                 fontSize: 13,
                                 color: '#6b7280',
                                 marginBottom: 12,
+                                maxWidth: 720,
                             }}
                         >
-                            Most of your recent work is focused on{' '}
-                            <strong style={{ color: '#111827' }}>
-                                {stats.topImpact}
-                            </strong>
-                            , showing strong delivery impact.
+                            {getImpactInsight(stats.topImpact, stats.impactBreakdown)}
                         </p>
                     )}
 
