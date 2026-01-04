@@ -140,7 +140,10 @@ This project was built as:
 
 ## 📸 Screenshots
 
-_(Coming next — dashboard, logs, summary views)_
+![Dashboard](docs/screenshots/dashboard.png)
+![Logs](docs/screenshots/logs.png)
+![Summary](docs/screenshots/summary.png)
+
 
 ---
 
