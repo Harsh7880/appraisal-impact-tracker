@@ -142,18 +142,7 @@ This project was built as:
 
 _(Coming next — dashboard, logs, summary views)_
 
-
 ---
-
-### ✅ This README is now:
-- Portfolio-ready  
-- Recruiter-friendly  
-- Honest about AI usage (without underselling)  
-- Structured like a real SaaS product  
-
-Next step when you’re ready:
-**Deployment + screenshots + live demo link** 🚀
-
 
 ## 📦 Project Structure (High-level)
 
