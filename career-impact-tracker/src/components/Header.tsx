@@ -50,7 +50,7 @@ export default function Header() {
       >
         {/* Left */}
         <Link
-          to={email ? '/logs' : '/'}
+          to={email ? '/dashboard' : '/'}
           style={{
             textDecoration: 'none',
             color: '#111827',

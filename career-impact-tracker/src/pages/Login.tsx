@@ -24,7 +24,7 @@ export default function Login() {
 
     const { data } = await supabase.auth.getSession()
     if (data.session) {
-      navigate('/logs')
+      navigate('/dashboard')
       setLoading(false)
       return
     }
@@ -44,7 +44,7 @@ export default function Login() {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession()
       if (data.session) {
-        navigate('/logs')
+        navigate('/dashboard')
       }
     }
 

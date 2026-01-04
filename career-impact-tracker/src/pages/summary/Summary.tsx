@@ -25,13 +25,11 @@ export default function Summary() {
   const [loading, setLoading] = useState(false)
   type Mode = 'appraisal' | 'resume' | 'manager'
   const [mode, setMode] = useState<Mode>('appraisal')
-  const [generating, setGenerating] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const animationKey = `${mode}-${summary.length}`
 
   const exportToPDF = () => {
     const doc = new jsPDF()
-    formatSummaryByMode(summary, mode);
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
     doc.text('Appraisal Summary', 14, 20)
