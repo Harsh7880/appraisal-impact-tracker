@@ -238,9 +238,12 @@ export default function Summary() {
       `}
     </style>
 
-      <h1 style={{ fontSize: 28, marginBottom: 16 }}>
+      <h1 style={{ fontSize: 28, marginBottom: 6 }}>
         Appraisal Summary
       </h1>
+      <p style={{ color: '#6b7280', marginBottom: 16 }}>
+        Generate a concise summary of your work for appraisals, resumes, or manager reviews.
+      </p>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <select
@@ -253,11 +256,38 @@ export default function Summary() {
           <option value="90">This Quarter</option>
           <option value="180">Last 6 months</option>
         </select>
+      
 
         <button onClick={generateSummary} disabled={loading} style={primaryButtonStyle}>
-          {loading ? 'Generating...' : 'Generate Summary'}
+         {loading ? 'Generating summary…' : 'Generate appraisal summary'}
         </button>
+        
       </div>
+        <p style={{ fontSize: 13, color: '#6b7280', marginTop: 6 }}>
+          We’ll summarize all work logs created during the selected period.
+        </p>
+      {!summary && !loading && (
+        <div
+          style={{
+            marginTop: 32,
+            padding: 24,
+            borderRadius: 12,
+            background: '#f9fafb',
+            border: '1px dashed #d1d5db',
+            textAlign: 'center',
+            color: '#374151'
+          }}
+        >
+          <h3 style={{ marginBottom: 8 }}>
+            Turn your work logs into a promotion-ready summary
+          </h3>
+          <p style={{ fontSize: 14, lineHeight: 1.6 }}>
+            Select a time period and click <strong>Generate Summary</strong> to
+            create a concise, impact-focused summary you can use for appraisals,
+            resumes, or manager reviews.
+          </p>
+        </div>
+      )}
       {summary && (
         <div
           style={{

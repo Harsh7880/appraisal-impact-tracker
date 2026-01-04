@@ -3,11 +3,11 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from './pages/Login'
 import AddLog from './pages/AddLog'
-import Logs from './pages/Logs'
+import Logs from './pages/logs/Logs'
 import Summary from './pages/summary/Summary'
 import RequireAuth from './components/RequireAuth'
 import Header from './components/Header'
-
+import EditLog from './pages/logs/EditLog'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -39,6 +39,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </RequireAuth>
       }
     />
+    <Route path="/logs/edit/:id" element={<EditLog />} />
+
 
       </Routes>
     </BrowserRouter>
